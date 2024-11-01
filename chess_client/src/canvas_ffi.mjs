@@ -24,3 +24,7 @@ export function fillRect(context, colour, x, y, w, h) {
   context.fillStyle = colour;
   context.fillRect(x, y, w, h);
 }
+
+export function getWindowDimensions() {
+  return [window.innerWidth, window.innerHeight];
+}

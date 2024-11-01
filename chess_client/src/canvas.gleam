@@ -41,3 +41,6 @@ fn do_rect(
   width: Int,
   height: Int,
 ) -> Nil
+
+@external(javascript, "./canvas_ffi.mjs", "getWindowDimensions")
+pub fn window_dimensions() -> #(Int, Int)

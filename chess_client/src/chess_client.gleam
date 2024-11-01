@@ -10,10 +10,6 @@ import lustre/element
 import lustre/element/html
 import lustre/event
 
-const canvas_width = 1000
-
-const canvas_height = canvas_width
-
 pub fn main() {
   let app = lustre.application(init, update, view)
   let assert Ok(_) = lustre.start(app, "#app", Nil)
@@ -28,25 +24,22 @@ type Context {
 }
 
 type Model {
-  Model(context: Context)
+  Model(context: Context, canvas_size: Int)
 }
 
 fn init(_flags) -> #(Model, Effect(Msg)) {
-  #(Model(Uninitialised), effect.none())
+  let #(width, height) = canvas.window_dimensions()
+  #(Model(Uninitialised, int.min(width, height)), effect.none())
 }
 
-fn view(_model: Model) -> element.Element(Msg) {
+fn view(model: Model) -> element.Element(Msg) {
   html.canvas([
     attribute.id("canvas"),
-    attribute.width(canvas_width),
-    attribute.height(canvas_height),
+    attribute.width(model.canvas_size),
+    attribute.height(model.canvas_size),
     event.on_click(DrawRectangle),
   ])
 }
-
-// Update
-//
-//
 
 type Msg {
   DoNothing
@@ -58,9 +51,9 @@ type Msg {
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     DoNothing -> #(model, effect.none())
-    ContextFetched(context) -> #(Model(context), effect.none())
+    ContextFetched(context) -> #(Model(..model, context:), effect.none())
     FetchContext -> #(model, fetch_context())
-    DrawRectangle -> #(model, draw_rectangle(model.context))
+    DrawRectangle -> #(model, draw_rectangle(model))
   }
 }
 
@@ -94,12 +87,12 @@ fn fetch_context() -> Effect(Msg) {
   |> dispatch
 }
 
-fn draw_rectangle(context: Context) -> Effect(Msg) {
+fn draw_rectangle(model: Model) -> Effect(Msg) {
   use dispatch <- effect.from()
 
   let assert Ok(colour) = colour.from_rgb_hex(int.random(0xffffff))
 
-  case context {
+  case model.context {
     ContextError(error) -> {
       io.println_error("Error ocurred: " <> error)
       dispatch(DoNothing)
@@ -109,7 +102,7 @@ fn draw_rectangle(context: Context) -> Effect(Msg) {
       dispatch(DrawRectangle)
     }
     ValidContext(context) -> {
-      canvas.rect(context, colour, 0, 0, canvas_width, canvas_height)
+      canvas.rect(context, colour, 0, 0, model.canvas_size, model.canvas_size)
       dispatch(DoNothing)
     }
   }
