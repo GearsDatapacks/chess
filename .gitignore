@@ -1,0 +1,5 @@
+*.beam
+*.ez
+chess_client/build
+chess_engine/build
+erl_crash.dump
