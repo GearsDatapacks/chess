@@ -1,6 +1,6 @@
 *.beam
 *.ez
 client/build
-client/priv
 server/build
+shared/build
 erl_crash.dump

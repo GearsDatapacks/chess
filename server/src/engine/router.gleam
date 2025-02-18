@@ -1,12 +1,9 @@
 import carpenter/table
+import chess/board.{type Board}
 import engine/web
 import gleam/http.{Get, Post}
 import gleam/string_tree
 import wisp.{type Request, type Response}
-
-pub type Board {
-  Board
-}
 
 pub fn handle_request(req: Request, table: table.Set(String, Board)) -> Response {
   use req <- web.middleware(req)
@@ -33,6 +30,6 @@ fn home_page(req: Request) -> Response {
 
 fn new_game(req: Request, table: table.Set(String, Board)) -> Response {
   use <- wisp.require_method(req, Post)
-  table.insert(table, [#("board", Board)])
+  table.insert(table, [#("board", board.empty())])
   wisp.ok()
 }
