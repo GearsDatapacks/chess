@@ -35,4 +35,5 @@ fn new_game(req: Request) -> Response {
   |> wisp.set_body(
     wisp.Bytes(bytes_tree.from_bit_array(board.to_binary(board))),
   )
+  |> wisp.set_header("Access-Control-Allow-Origin", "*")
 }

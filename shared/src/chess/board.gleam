@@ -1,5 +1,4 @@
 import chess/piece.{type Piece}
-import gleam/bit_array
 import gleam/dict.{type Dict}
 import gleam/result
 
@@ -16,7 +15,7 @@ pub type Square {
 
 fn square_from_binary(bits: BitArray) -> Result(#(Square, BitArray), Nil) {
   case bits {
-    <<0b0000:size(4), rest:bits>> -> Ok(#(Empty, rest))
+    <<piece:size(4), rest:bits>> if piece == 0 -> Ok(#(Empty, rest))
     _ ->
       piece.from_binary(bits)
       |> result.map(fn(pair) {
@@ -60,7 +59,7 @@ fn to_binary_loop(board: Board, x: Int, y: Int, bits: BitArray) -> BitArray {
         False -> #(x + 1, y)
         True -> #(0, y + 1)
       }
-      to_binary_loop(board, x, y, bit_array.append(bits, square_bits))
+      to_binary_loop(board, x, y, <<bits:bits, square_bits:bits>>)
     }
   }
 }
