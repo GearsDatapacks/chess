@@ -1,5 +1,5 @@
 import canvas
-import chess/board.{type Board}
+import chess/game.{type Game}
 import gleam/fetch
 import gleam/http
 import gleam/http/request
@@ -13,12 +13,12 @@ pub fn main(canvas_size: Int) {
   let assert Ok(context) = canvas.context(canvas)
   canvas.rect(context, colour.blue, 0, 0, canvas_size, canvas_size)
 
-  use board <- promise.try_await(get_board())
-  let _ = board
+  use game <- promise.try_await(get_game())
+  let _ = game
   promise.resolve(Ok(Nil))
 }
 
-fn get_board() -> Promise(Result(Board, fetch.FetchError)) {
+fn get_game() -> Promise(Result(Game, fetch.FetchError)) {
   let assert Ok(request) =
     request.to(
       "http://localhost:" <> int.to_string(shared.server_port) <> "/new",
@@ -27,5 +27,5 @@ fn get_board() -> Promise(Result(Board, fetch.FetchError)) {
   use response <- promise.try_await(fetch.send(request))
   use response <- promise.try_await(fetch.read_text_body(response))
 
-  promise.resolve(Ok(board.from_fen(response.body)))
+  promise.resolve(Ok(game.from_fen(response.body)))
 }

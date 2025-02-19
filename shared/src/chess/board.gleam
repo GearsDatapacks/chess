@@ -15,6 +15,43 @@ pub type Square {
   Occupied(Piece)
 }
 
+pub type Position {
+  Position(file: Int, rank: Int)
+}
+
+pub fn position_to_string(position: Position) -> String {
+  let file = case position.file {
+    0 -> "a"
+    1 -> "b"
+    2 -> "c"
+    3 -> "d"
+    4 -> "e"
+    5 -> "f"
+    6 -> "g"
+    7 -> "h"
+    _ -> "a"
+  }
+
+  file <> int.to_string(position.rank)
+}
+
+pub fn position_from_string(string: String) -> Position {
+  let assert Ok(#(rank, file)) = string.pop_grapheme(string)
+  let rank = case rank {
+    "a" -> 0
+    "b" -> 1
+    "c" -> 2
+    "d" -> 3
+    "e" -> 4
+    "f" -> 5
+    "g" -> 6
+    "h" -> 7
+    _ -> 0
+  }
+  let assert Ok(file) = int.parse(file)
+  Position(rank:, file:)
+}
+
 fn square_from_binary(bits: BitArray) -> Result(#(Square, BitArray), Nil) {
   case bits {
     <<piece:size(4), rest:bits>> if piece == 0 -> Ok(#(Empty, rest))
@@ -93,8 +130,6 @@ pub fn from_fen(fen: String) -> Board {
 fn from_fen_loop(fen: String, file: Int, rank: Int, board: Board) -> Board {
   case string.pop_grapheme(fen) {
     Error(_) -> board
-    // TODO: Handle extra fen information
-    Ok(#(" ", _fen)) -> board
     Ok(#("/", fen)) -> from_fen_loop(fen, 0, rank + 1, board)
     Ok(#(char, fen)) ->
       case int.parse(char) {
@@ -137,7 +172,6 @@ fn to_fen_loop(
     True -> #(0, rank + 1)
   }
   case dict.get(board.squares, #(file, rank)) {
-    // TODO: Encode rest of fen information
     Error(_) -> fen
     Ok(Empty) ->
       case next_file == 0 {
