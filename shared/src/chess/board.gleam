@@ -1,6 +1,8 @@
 import chess/piece.{type Piece}
 import gleam/dict.{type Dict}
+import gleam/int
 import gleam/result
+import gleam/string
 
 pub const size = 8
 
@@ -78,6 +80,83 @@ fn from_binary_loop(bits: BitArray, x: Int, y: Int, board: Board) -> Board {
         True -> #(0, y + 1)
       }
       from_binary_loop(bits, x, y, board)
+    }
+  }
+}
+
+pub const starting_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+pub fn from_fen(fen: String) -> Board {
+  from_fen_loop(fen, 0, 0, empty())
+}
+
+fn from_fen_loop(fen: String, file: Int, rank: Int, board: Board) -> Board {
+  case string.pop_grapheme(fen) {
+    Error(_) -> board
+    // TODO: Handle extra fen information
+    Ok(#(" ", _fen)) -> board
+    Ok(#("/", fen)) -> from_fen_loop(fen, 0, rank + 1, board)
+    Ok(#(char, fen)) ->
+      case int.parse(char) {
+        Ok(empty_spaces) -> from_fen_loop(fen, file + empty_spaces, rank, board)
+        Error(_) ->
+          case piece.from_fen(char) {
+            Error(_) -> board
+            Ok(piece) -> {
+              let board =
+                Board(dict.insert(board.squares, #(file, rank), Occupied(piece)))
+              from_fen_loop(fen, file + 1, rank, board)
+            }
+          }
+      }
+  }
+}
+
+pub fn to_fen(board: Board) -> String {
+  to_fen_loop(board, 0, 0, 0, "")
+}
+
+fn to_fen_loop(
+  board: Board,
+  file: Int,
+  rank: Int,
+  empty: Int,
+  fen: String,
+) -> String {
+  let fen = case file == 0 {
+    True ->
+      case rank == 0 || rank >= size {
+        False -> fen <> "/"
+        True -> fen
+      }
+    False -> fen
+  }
+
+  let #(next_file, next_rank) = case file + 1 >= size {
+    False -> #(file + 1, rank)
+    True -> #(0, rank + 1)
+  }
+  case dict.get(board.squares, #(file, rank)) {
+    // TODO: Encode rest of fen information
+    Error(_) -> fen
+    Ok(Empty) ->
+      case next_file == 0 {
+        False -> to_fen_loop(board, next_file, next_rank, empty + 1, fen)
+        True ->
+          to_fen_loop(
+            board,
+            next_file,
+            next_rank,
+            0,
+            fen <> int.to_string(empty + 1),
+          )
+      }
+    Ok(Occupied(piece)) -> {
+      let fen = case empty {
+        0 -> fen
+        _ -> fen <> int.to_string(empty)
+      }
+      to_fen_loop(board, next_file, next_rank, 0, fen <> piece.to_fen(piece))
     }
   }
 }

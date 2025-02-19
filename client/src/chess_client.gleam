@@ -25,7 +25,7 @@ fn get_board() -> Promise(Result(Board, fetch.FetchError)) {
     )
   let request = request |> request.set_method(http.Post)
   use response <- promise.try_await(fetch.send(request))
-  use response <- promise.try_await(fetch.read_bytes_body(response))
+  use response <- promise.try_await(fetch.read_text_body(response))
 
-  promise.resolve(Ok(board.from_binary(response.body)))
+  promise.resolve(Ok(board.from_fen(response.body)))
 }

@@ -1,6 +1,5 @@
 import chess/board
 import engine/web
-import gleam/bytes_tree
 import gleam/http.{Get, Post}
 import gleam/string_tree
 import wisp.{type Request, type Response}
@@ -30,10 +29,7 @@ fn home_page(req: Request) -> Response {
 
 fn new_game(req: Request) -> Response {
   use <- wisp.require_method(req, Post)
-  let board = board.empty()
   wisp.ok()
-  |> wisp.set_body(
-    wisp.Bytes(bytes_tree.from_bit_array(board.to_binary(board))),
-  )
+  |> wisp.string_body(board.starting_fen)
   |> wisp.set_header("Access-Control-Allow-Origin", "*")
 }
