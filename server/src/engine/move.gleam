@@ -112,3 +112,8 @@ fn get_pawn_moves(game: Game, position: Position) -> List(Move) {
   |> result.map(list.wrap)
   |> result.unwrap([])
 }
+
+// TODO: Implement
+pub fn apply_move(game: Game, _move: Move) -> Game {
+  game
+}

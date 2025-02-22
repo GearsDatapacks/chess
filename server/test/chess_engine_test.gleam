@@ -1,5 +1,38 @@
+import chess/game
+import engine/move
+import gleam/int
+import gleam/list
 import gleeunit
+import gleeunit/should
 
 pub fn main() {
   gleeunit.main()
+}
+
+fn perft_all(fen: String, expected: List(Int)) {
+  expected
+  |> list.index_map(fn(expected, index) { perft(fen, index + 1, expected) })
+  Nil
+}
+
+fn perft(fen: String, depth: Int, expected_moves: Int) {
+  do_perft(game.from_fen(fen), depth - 1) |> should.equal(expected_moves)
+}
+
+fn do_perft(game: game.Game, depth: Int) -> Int {
+  let legal_moves = move.legal_moves(game)
+  case depth {
+    0 -> list.length(legal_moves)
+    _ ->
+      list.map(legal_moves, fn(move) {
+        game |> move.apply_move(move) |> do_perft(depth - 1)
+      })
+      |> int.sum
+  }
+}
+
+pub fn perft_initial_position_test() {
+  perft_all("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", [
+    20, 400, 8902, 197_281, 4_865_609, 119_060_324,
+  ])
 }
