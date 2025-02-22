@@ -18,6 +18,13 @@ pub fn in_direction(
   }
 }
 
+pub fn multiply(direction: Direction, by: Int) -> Direction {
+  Direction(
+    file_change: direction.file_change * by,
+    rank_change: direction.rank_change * by,
+  )
+}
+
 pub const left = Direction(-1, 0)
 
 pub const right = Direction(1, 0)
@@ -47,4 +54,15 @@ pub const queen_directions = [
   up_right,
   down_left,
   down_right,
+]
+
+pub const knight_directions = [
+  Direction(-1, -2),
+  Direction(1, -2),
+  Direction(-1, 2),
+  Direction(1, 2),
+  Direction(2, -1),
+  Direction(2, 1),
+  Direction(-2, -1),
+  Direction(-2, 1),
 ]

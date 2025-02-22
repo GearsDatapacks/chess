@@ -25,12 +25,9 @@ fn get_moves_for_piece(
       get_sliding_moves(game, position, direction.bishop_directions)
     piece.Queen -> get_sliding_moves(game, position, direction.queen_directions)
     piece.Rook -> get_sliding_moves(game, position, direction.rook_directions)
-    // TODO: King moves
-    piece.King -> []
-    // TODO: Pawn moves
+    piece.King -> get_king_moves(game, position)
     piece.Pawn -> get_pawn_moves(game, position)
-    // TODO: Knight moves
-    piece.Knight -> []
+    piece.Knight -> get_knight_moves(game, position)
   }
 }
 
@@ -102,15 +99,45 @@ fn get_sliding_moves_loop(
   }
 }
 
+fn get_king_moves(game: Game, position: Position) -> List(Move) {
+  direction.queen_directions |> list.filter_map(maybe_move(game, position, _))
+}
+
+fn get_knight_moves(game: Game, position: Position) -> List(Move) {
+  direction.knight_directions |> list.filter_map(maybe_move(game, position, _))
+}
+
 fn get_pawn_moves(game: Game, position: Position) -> List(Move) {
-  // TODO: double moves, taking moves
-  let direction = case game.to_move {
-    piece.Black -> direction.down
-    piece.White -> direction.up
+  let #(direction, take_directions) = case game.to_move {
+    piece.Black -> #(direction.down, [direction.down_left, direction.down_right])
+    piece.White -> #(direction.up, [direction.up_left, direction.up_right])
   }
-  maybe_move(game, position, direction)
-  |> result.map(list.wrap)
-  |> result.unwrap([])
+  let directions = case game.to_move, position.rank {
+    piece.Black, 1 | piece.White, 6 -> [
+      direction,
+      direction.multiply(direction, 2),
+    ]
+    _, _ -> [direction]
+  }
+  directions
+  |> list.filter_map(maybe_move(game, position, _))
+  |> list.append(
+    take_directions
+    |> list.filter_map(fn(direction) {
+      case direction.in_direction(position, direction) {
+        Error(_) -> Error(Nil)
+        Ok(to) ->
+          case dict.get(game.board.squares, to) {
+            Error(_) -> Error(Nil)
+            Ok(square) ->
+              case move_validity(square, game.to_move) {
+                Invalid | Valid -> Error(Nil)
+                ValidThenStop -> Ok(board.Move(from: position, to:))
+              }
+          }
+      }
+    }),
+  )
 }
 
 // TODO: Implement
