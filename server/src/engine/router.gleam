@@ -3,9 +3,6 @@ import chess/game
 import engine/move
 import engine/web
 import gleam/http.{Get}
-import gleam/io
-import gleam/list
-import gleam/string
 import gleam/string_tree
 import shared
 import wisp.{type Request, type Response}
