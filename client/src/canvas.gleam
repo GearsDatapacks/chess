@@ -32,6 +32,16 @@ pub fn rect(
   |> do_rect(context, _, x, y, width, height)
 }
 
+@external(javascript, "./canvas_ffi.mjs", "drawImage")
+pub fn image(
+  context: Context,
+  path: String,
+  x: Int,
+  y: Int,
+  width: Int,
+  height: Int,
+) -> Nil
+
 @external(javascript, "./canvas_ffi.mjs", "fillRect")
 fn do_rect(
   context: Context,

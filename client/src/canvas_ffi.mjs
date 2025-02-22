@@ -28,3 +28,11 @@ export function fillRect(context, colour, x, y, w, h) {
 export function getWindowDimensions() {
   return [window.innerWidth, window.innerHeight];
 }
+
+export function drawImage(context, path, x, y, w, h) {
+  const img = new Image();
+  img.src = path;
+  img.onload = () => {
+    context.drawImage(img, x, y, w, h);
+  }
+}

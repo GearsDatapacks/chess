@@ -7,7 +7,7 @@ import gleam/string
 pub const size = 8
 
 pub type Board {
-  Board(squares: Dict(#(Int, Int), Square))
+  Board(squares: Dict(Position, Square))
 }
 
 pub type Square {
@@ -84,15 +84,15 @@ pub fn empty() -> Board {
 }
 
 fn populate_squares(
-  squares: Dict(#(Int, Int), Square),
-  x: Int,
-  y: Int,
-) -> Dict(#(Int, Int), Square) {
-  let squares = dict.insert(squares, #(x, y), Empty)
-  case x + 1 >= size, y + 1 >= size {
-    True, False -> populate_squares(squares, 0, y + 1)
+  squares: Dict(Position, Square),
+  file: Int,
+  rank: Int,
+) -> Dict(Position, Square) {
+  let squares = dict.insert(squares, Position(file:, rank:), Empty)
+  case file + 1 >= size, rank + 1 >= size {
+    True, False -> populate_squares(squares, 0, rank + 1)
     True, True -> squares
-    False, _ -> populate_squares(squares, x + 1, y)
+    False, _ -> populate_squares(squares, file + 1, rank)
   }
 }
 
@@ -100,17 +100,22 @@ pub fn to_binary(board: Board) -> BitArray {
   to_binary_loop(board, 0, 0, <<>>)
 }
 
-fn to_binary_loop(board: Board, x: Int, y: Int, bits: BitArray) -> BitArray {
-  case dict.get(board.squares, #(x, y)) {
+fn to_binary_loop(
+  board: Board,
+  file: Int,
+  rank: Int,
+  bits: BitArray,
+) -> BitArray {
+  case dict.get(board.squares, Position(file:, rank:)) {
     Error(_) -> bits
     Ok(square) -> {
       let square_bits = case square {
         Empty -> <<0:size(4)>>
         Occupied(piece) -> piece.to_binary(piece)
       }
-      let #(x, y) = case x + 1 >= size {
-        False -> #(x + 1, y)
-        True -> #(0, y + 1)
+      let #(x, y) = case file + 1 >= size {
+        False -> #(file + 1, rank)
+        True -> #(0, rank + 1)
       }
       to_binary_loop(board, x, y, <<bits:bits, square_bits:bits>>)
     }
@@ -121,14 +126,15 @@ pub fn from_binary(bits: BitArray) -> Board {
   from_binary_loop(bits, 0, 0, Board(dict.new()))
 }
 
-fn from_binary_loop(bits: BitArray, x: Int, y: Int, board: Board) -> Board {
+fn from_binary_loop(bits: BitArray, file: Int, rank: Int, board: Board) -> Board {
   case square_from_binary(bits) {
     Error(_) -> board
     Ok(#(square, bits)) -> {
-      let board = Board(dict.insert(board.squares, #(x, y), square))
-      let #(x, y) = case x + 1 >= size {
-        False -> #(x + 1, y)
-        True -> #(0, y + 1)
+      let board =
+        Board(dict.insert(board.squares, Position(file:, rank:), square))
+      let #(x, y) = case file + 1 >= size {
+        False -> #(file + 1, rank)
+        True -> #(0, rank + 1)
       }
       from_binary_loop(bits, x, y, board)
     }
@@ -153,7 +159,11 @@ fn from_fen_loop(fen: String, file: Int, rank: Int, board: Board) -> Board {
             Error(_) -> board
             Ok(piece) -> {
               let board =
-                Board(dict.insert(board.squares, #(file, rank), Occupied(piece)))
+                Board(dict.insert(
+                  board.squares,
+                  Position(file:, rank:),
+                  Occupied(piece),
+                ))
               from_fen_loop(fen, file + 1, rank, board)
             }
           }
@@ -185,7 +195,7 @@ fn to_fen_loop(
     False -> #(file + 1, rank)
     True -> #(0, rank + 1)
   }
-  case dict.get(board.squares, #(file, rank)) {
+  case dict.get(board.squares, Position(file:, rank:)) {
     Error(_) -> fen
     Ok(Empty) ->
       case next_file == 0 {
