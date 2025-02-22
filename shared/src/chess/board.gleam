@@ -52,6 +52,20 @@ pub fn position_from_string(string: String) -> Position {
   Position(rank:, file:)
 }
 
+pub type Move {
+  Move(from: Position, to: Position)
+}
+
+pub fn move_to_string(move: Move) -> String {
+  position_to_string(move.from) <> position_to_string(move.to)
+}
+
+pub fn move_from_string(string: String) -> Move {
+  let from = string |> string.drop_end(2) |> position_from_string
+  let to = string |> string.drop_start(2) |> position_from_string
+  Move(from:, to:)
+}
+
 fn square_from_binary(bits: BitArray) -> Result(#(Square, BitArray), Nil) {
   case bits {
     <<piece:size(4), rest:bits>> if piece == 0 -> Ok(#(Empty, rest))
