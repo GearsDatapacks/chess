@@ -114,7 +114,7 @@ fn get_pawn_moves(game: Game, position: Position) -> List(Move) {
     piece.White -> #(direction.up, [direction.up_left, direction.up_right])
   }
   let directions = case game.to_move, position.rank {
-    piece.Black, 1 | piece.White, 6 -> [
+    piece.Black, 6 | piece.White, 1 -> [
       direction,
       direction.multiply(direction, 2),
     ]

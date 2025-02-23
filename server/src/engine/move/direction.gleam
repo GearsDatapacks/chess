@@ -29,17 +29,17 @@ pub const left = Direction(-1, 0)
 
 pub const right = Direction(1, 0)
 
-pub const up = Direction(0, -1)
+pub const up = Direction(0, 1)
 
-pub const down = Direction(0, 1)
+pub const down = Direction(0, -1)
 
-pub const up_left = Direction(-1, -1)
+pub const up_left = Direction(-1, 1)
 
-pub const down_left = Direction(-1, 1)
+pub const down_left = Direction(-1, -1)
 
-pub const up_right = Direction(1, -1)
+pub const up_right = Direction(1, 1)
 
-pub const down_right = Direction(1, 1)
+pub const down_right = Direction(1, -1)
 
 pub const rook_directions = [left, right, up, down]
 
