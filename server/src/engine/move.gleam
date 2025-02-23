@@ -1,11 +1,12 @@
-import chess/board.{type Move, type Position}
-import chess/game.{type Game}
+import chess/board.{type Move, type Position, Board}
+import chess/game.{type Game, Game}
 import chess/piece
 import engine/move/direction.{type Direction}
 import gleam/dict
 import gleam/list
 import gleam/result
 
+// TODO: en passant, castling, check
 pub fn legal_moves(game: Game) -> List(Move) {
   use moves, position, square <- dict.fold(game.board.squares, [])
   case square {
@@ -140,7 +141,24 @@ fn get_pawn_moves(game: Game, position: Position) -> List(Move) {
   )
 }
 
-// TODO: Implement
-pub fn apply_move(game: Game, _move: Move) -> Game {
-  game
+pub fn apply_move(game: Game, move: Move) -> Game {
+  let squares = case dict.get(game.board.squares, move.from) {
+    Error(_) -> game.board.squares
+    Ok(square) ->
+      game.board.squares
+      |> dict.insert(move.to, square)
+      |> dict.insert(move.from, board.Empty)
+  }
+  let #(to_move, move_increment) = case game.to_move {
+    piece.Black -> #(piece.White, 1)
+    piece.White -> #(piece.Black, 0)
+  }
+  // TODO: only increment half moves if a reversible move was taken
+  Game(
+    ..game,
+    to_move:,
+    board: Board(squares:),
+    half_moves: game.half_moves + 1,
+    full_moves: game.full_moves + move_increment,
+  )
 }

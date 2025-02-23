@@ -1,3 +1,4 @@
+import chess/board
 import chess/game
 import engine/move
 import gleam/int
@@ -35,4 +36,12 @@ pub fn perft_initial_position_test() {
   perft_all("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", [
     20, 400, 8902, 197_281, 4_865_609, 119_060_324,
   ])
+}
+
+pub fn apply_move_test() {
+  board.starting_fen
+  |> game.from_fen
+  |> move.apply_move(board.move_from_string("a2a4"))
+  |> game.to_fen
+  |> should.equal("rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1")
 }
