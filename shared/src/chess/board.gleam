@@ -32,12 +32,12 @@ pub fn position_to_string(position: Position) -> String {
     _ -> "a"
   }
 
-  file <> int.to_string(position.rank)
+  file <> int.to_string(position.rank + 1)
 }
 
 pub fn position_from_string(string: String) -> Position {
-  let assert Ok(#(rank, file)) = string.pop_grapheme(string)
-  let rank = case rank {
+  let assert Ok(#(file, rank)) = string.pop_grapheme(string)
+  let file = case file {
     "a" -> 0
     "b" -> 1
     "c" -> 2
@@ -48,8 +48,8 @@ pub fn position_from_string(string: String) -> Position {
     "h" -> 7
     _ -> 0
   }
-  let assert Ok(file) = int.parse(file)
-  Position(rank:, file:)
+  let assert Ok(rank) = int.parse(rank)
+  Position(file:, rank: rank - 1)
 }
 
 pub type Move {
@@ -144,13 +144,13 @@ fn from_binary_loop(bits: BitArray, file: Int, rank: Int, board: Board) -> Board
 pub const starting_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 pub fn from_fen(fen: String) -> Board {
-  from_fen_loop(fen, 0, 0, empty())
+  from_fen_loop(fen, 0, size - 1, empty())
 }
 
 fn from_fen_loop(fen: String, file: Int, rank: Int, board: Board) -> Board {
   case string.pop_grapheme(fen) {
     Error(_) -> board
-    Ok(#("/", fen)) -> from_fen_loop(fen, 0, rank + 1, board)
+    Ok(#("/", fen)) -> from_fen_loop(fen, 0, rank - 1, board)
     Ok(#(char, fen)) ->
       case int.parse(char) {
         Ok(empty_spaces) -> from_fen_loop(fen, file + empty_spaces, rank, board)
@@ -172,7 +172,7 @@ fn from_fen_loop(fen: String, file: Int, rank: Int, board: Board) -> Board {
 }
 
 pub fn to_fen(board: Board) -> String {
-  to_fen_loop(board, 0, 0, 0, "")
+  to_fen_loop(board, 0, size - 1, 0, "")
 }
 
 fn to_fen_loop(
@@ -184,7 +184,7 @@ fn to_fen_loop(
 ) -> String {
   let fen = case file == 0 {
     True ->
-      case rank == 0 || rank >= size {
+      case rank == size - 1 || rank < 0 {
         False -> fen <> "/"
         True -> fen
       }
@@ -193,8 +193,9 @@ fn to_fen_loop(
 
   let #(next_file, next_rank) = case file + 1 >= size {
     False -> #(file + 1, rank)
-    True -> #(0, rank + 1)
+    True -> #(0, rank - 1)
   }
+
   case dict.get(board.squares, Position(file:, rank:)) {
     Error(_) -> fen
     Ok(Empty) ->
