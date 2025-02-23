@@ -142,23 +142,38 @@ fn get_pawn_moves(game: Game, position: Position) -> List(Move) {
 }
 
 pub fn apply_move(game: Game, move: Move) -> Game {
-  let squares = case dict.get(game.board.squares, move.from) {
-    Error(_) -> game.board.squares
-    Ok(square) ->
+  let newly_occupied = dict.get(game.board.squares, move.to)
+  let #(squares, moved_piece) = case dict.get(game.board.squares, move.from) {
+    Error(_) -> #(game.board.squares, board.Empty)
+    Ok(square) -> #(
       game.board.squares
-      |> dict.insert(move.to, square)
-      |> dict.insert(move.from, board.Empty)
+        |> dict.insert(move.to, square)
+        |> dict.insert(move.from, board.Empty),
+      square,
+    )
   }
   let #(to_move, move_increment) = case game.to_move {
     piece.Black -> #(piece.White, 1)
     piece.White -> #(piece.Black, 0)
   }
-  // TODO: only increment half moves if a reversible move was taken
+  let was_capture = case newly_occupied {
+    Ok(board.Occupied(_)) -> True
+    _ -> False
+  }
+  let was_pawn_move = case moved_piece {
+    board.Occupied(piece.Piece(kind: piece.Pawn, ..)) -> True
+    _ -> False
+  }
+  let half_moves = case was_capture || was_pawn_move {
+    False -> game.half_moves + 1
+    True -> 0
+  }
+
   Game(
     ..game,
     to_move:,
     board: Board(squares:),
-    half_moves: game.half_moves + 1,
+    half_moves:,
     full_moves: game.full_moves + move_increment,
   )
 }
