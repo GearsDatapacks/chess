@@ -7,7 +7,7 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
 
-// TODO: en passant, castling, check
+// TODO: castling, check
 pub fn legal_moves(game: Game) -> List(Move) {
   use moves, position, square <- dict.fold(game.board.squares, [])
   case square {
@@ -132,9 +132,13 @@ fn get_pawn_moves(game: Game, position: Position) -> List(Move) {
           case dict.get(game.board.squares, to) {
             Error(_) -> Error(Nil)
             Ok(square) ->
-              case move_validity(square, game.to_move) {
-                Invalid | Valid -> Error(Nil)
-                ValidThenStop -> Ok(board.Move(from: position, to:))
+              case
+                move_validity(square, game.to_move),
+                game.en_passant == Some(to)
+              {
+                _, True | ValidThenStop, _ ->
+                  Ok(board.Move(from: position, to:))
+                _, _ -> Error(Nil)
               }
           }
       }
