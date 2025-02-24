@@ -180,6 +180,15 @@ pub fn apply_move(game: Game, move: Move) -> Game {
     _, _ -> None
   }
 
+  let squares = case Some(move.to) == game.en_passant && was_pawn_move {
+    False -> squares
+    True -> {
+      let captured_pawn =
+        board.Position(file: move.to.file, rank: move.from.rank)
+      dict.insert(squares, captured_pawn, board.Empty)
+    }
+  }
+
   Game(
     ..game,
     to_move:,

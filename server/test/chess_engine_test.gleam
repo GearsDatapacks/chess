@@ -66,4 +66,12 @@ pub fn apply_move_test() {
   |> should.equal(
     "rnbqkbnr/p1pppppp/8/1p6/P7/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 2",
   )
+
+  "rnbqkbnr/p1p1pppp/8/Pp1p4/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 3"
+  |> game.from_fen
+  |> move.apply_move(board.move_from_string("a5b6"))
+  |> game.to_fen
+  |> should.equal(
+    "rnbqkbnr/p1p1pppp/1P6/3p4/8/8/1PPPPPPP/RNBQKBNR b KQkq - 0 3",
+  )
 }
