@@ -43,7 +43,7 @@ pub fn apply_move_test() {
   |> game.from_fen
   |> move.apply_move(board.move_from_string("a2a4"))
   |> game.to_fen
-  |> should.equal("rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1")
+  |> should.equal("rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq a3 0 1")
 
   board.starting_fen
   |> game.from_fen

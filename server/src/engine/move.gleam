@@ -4,6 +4,7 @@ import chess/piece
 import engine/move/direction.{type Direction}
 import gleam/dict
 import gleam/list
+import gleam/option.{None, Some}
 import gleam/result
 
 // TODO: en passant, castling, check
@@ -152,21 +153,31 @@ pub fn apply_move(game: Game, move: Move) -> Game {
       square,
     )
   }
+
   let #(to_move, move_increment) = case game.to_move {
     piece.Black -> #(piece.White, 1)
     piece.White -> #(piece.Black, 0)
   }
+
   let was_capture = case newly_occupied {
     Ok(board.Occupied(_)) -> True
     _ -> False
   }
+
   let was_pawn_move = case moved_piece {
     board.Occupied(piece.Piece(kind: piece.Pawn, ..)) -> True
     _ -> False
   }
+
   let half_moves = case was_capture || was_pawn_move {
     False -> game.half_moves + 1
     True -> 0
+  }
+
+  let en_passant = case was_pawn_move, move.to.rank - move.from.rank {
+    True, 2 -> Some(board.Position(file: move.to.file, rank: move.to.rank - 1))
+    True, -2 -> Some(board.Position(file: move.to.file, rank: move.to.rank + 1))
+    _, _ -> None
   }
 
   Game(
@@ -175,5 +186,6 @@ pub fn apply_move(game: Game, move: Move) -> Game {
     board: Board(squares:),
     half_moves:,
     full_moves: game.full_moves + move_increment,
+    en_passant:,
   )
 }
