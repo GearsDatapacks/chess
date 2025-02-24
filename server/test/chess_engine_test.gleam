@@ -50,4 +50,20 @@ pub fn apply_move_test() {
   |> move.apply_move(board.move_from_string("g1f3"))
   |> game.to_fen
   |> should.equal("rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1")
+
+  board.starting_fen
+  |> game.from_fen
+  |> move.apply_move(board.move_from_string("a2a4"))
+  |> move.apply_move(board.move_from_string("b8c6"))
+  |> game.to_fen
+  |> should.equal("r1bqkbnr/pppppppp/2n5/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 1 2")
+
+  board.starting_fen
+  |> game.from_fen
+  |> move.apply_move(board.move_from_string("a2a4"))
+  |> move.apply_move(board.move_from_string("b7b5"))
+  |> game.to_fen
+  |> should.equal(
+    "rnbqkbnr/p1pppppp/8/1p6/P7/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 2",
+  )
 }
